@@ -6,6 +6,7 @@ class playGame extends Phaser.Scene {
     super("PlayGame");
     this.platforms;
     this.player;
+    //this.player2;
     this.cursors;
     this.stars;
     this.score = 0;
@@ -14,6 +15,11 @@ class playGame extends Phaser.Scene {
     this.door;
     this.danger1;
     this.danger2;
+
+    // let keyA;
+    // let keyS;
+    // let keyD;
+    // let keyW;
   }
 
   preload() {
@@ -31,9 +37,20 @@ class playGame extends Phaser.Scene {
       frameWidth: 32,
       frameHeight: 48,
     });
+
+    // this.load.spritesheet("p2", "assets/p2.png", {
+    //   frameWidth: 32,
+    //   frameHeight: 48,
+    // });
   }
 
   create() {
+
+    // keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+    // keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+    // keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+    // keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+
     //fundo
     this.add.image(400, 300, "sky");
 
@@ -45,36 +62,28 @@ class playGame extends Phaser.Scene {
     this.danger1=this.physics.add.staticGroup();
     this.danger1.create(650, 530, "danger1").setScale(0.5, 0.75).refreshBody();
     this.danger1.create(200, 530, "danger1").setScale(0.5, 0.75).refreshBody();
-    
-    //this.danger1.create(300, 390, "danger1").setScale(0.25,0.75).refreshBody();
-    // this.physics.add.collider(
-    //   this.player,
-    //   this.danger1,
-    //   this.hitDanger1,
-    //   null,
-    //   this
-    // );
-    //this.danger2=this.physics.add.staticGroup();
-    //this.danger2.create(300, 390, "danger2").setScale(0.25,0.75).refreshBody();
 
     //plataformas
     this.platforms = this.physics.add.staticGroup();
-
     this.platforms.create(400, 568, "ground").setScale(2).refreshBody();
-
     this.platforms.create(400, 400, "ground").setScale(0.8, 0.5).refreshBody();
     this.platforms.create(50, 250, "ground").setScale(0.3, 1).refreshBody();
     this.platforms.create(750, 250, "ground").setScale(0.3, 1).refreshBody();
     this.platforms.create(400, 100, "ground").setScale(0.6, 0.5).refreshBody();
 
-    //player
+    //player1
     this.player = this.physics.add.sprite(50, 450, "dude");
-
     this.player.setBounce(0.2);
     this.player.setCollideWorldBounds(true);
     this.physics.add.collider(this.player, this.platforms);
 
-    //animações
+    //player2
+    // this.player2 = this.physics.add.sprite(700, 450, "p2");
+    // this.player2.setBounce(0.2);
+    // this.player2.setCollideWorldBounds(true);
+    // this.physics.add.collider(this.player2, this.platforms);
+
+    //animações p1
     this.anims.create({
       key: "left",
       frames: this.anims.generateFrameNumbers("dude", { start: 0, end: 3 }),
@@ -94,6 +103,27 @@ class playGame extends Phaser.Scene {
       frameRate: 10,
       repeat: -1,
     });
+
+    //animações p2
+    // this.anims.create({
+    //   key: "left",
+    //   frames: this.anims.generateFrameNumbers("p2", { start: 0, end: 3 }),
+    //   frameRate: 10,
+    //   repeat: -1,
+    // });
+
+    // this.anims.create({
+    //   key: "turn",
+    //   frames: [{ key: "p2", frame: 4 }],
+    //   frameRate: 20,
+    // });
+
+    // this.anims.create({
+    //   key: "right",
+    //   frames: this.anims.generateFrameNumbers("p2", { start: 5, end: 8 }),
+    //   frameRate: 10,
+    //   repeat: -1,
+    // });
 
     //estrelas
     this.stars = this.physics.add.group({
@@ -158,6 +188,19 @@ class playGame extends Phaser.Scene {
     if (this.cursors.up.isDown && this.player.body.touching.down) {
       this.player.setVelocityY(-330);
     }
+
+    // if(keyA.isDown) {
+    //   this.player2.setVelocityX(-160);
+    //   this.player2.anims.play("left", true);
+    // } else if(keyD.isDown) {
+    //   this.player2.setVelocityX(160);
+    //   this.player2.anims.play("right", true);
+    // } else {
+    //   this.player2.setVelocityX(0);
+    //   this.player2.anims.play("turn");
+    // } if(keyW.isDown && this.player2.body.touching.down) {
+    //   this.player2.setVelocityY(-330);
+    // }
   }
 
   collectStar(player, star) {
@@ -190,7 +233,6 @@ class playGame extends Phaser.Scene {
 
     this.gameOver = true;
   }
-  
 }
 
 export default playGame;
