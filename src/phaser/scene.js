@@ -6,7 +6,7 @@ class playGame extends Phaser.Scene {
     super("PlayGame");
     this.platforms;
     this.player;
-    //this.player2;
+    this.player2;
     this.cursors;
     this.stars;
     this.score = 0;
@@ -16,10 +16,9 @@ class playGame extends Phaser.Scene {
     this.danger1;
     this.danger2;
 
-    // let keyA;
-    // let keyS;
-    // let keyD;
-    // let keyW;
+    this.keyA;
+    this.keyD;
+    this.keyW;
   }
 
   preload() {
@@ -45,23 +44,22 @@ class playGame extends Phaser.Scene {
   }
 
   create() {
-
-    // keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+    this.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
     // keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
-    // keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
-    // keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+    this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+    this.keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
 
     //fundo
     this.add.image(400, 300, "sky");
 
     //portas
-    this.door=this.physics.add.staticGroup();
+    this.door = this.physics.add.staticGroup();
     this.door.create(400, 370, "door").setScale(2).refreshBody();
 
     //blocos mortais (tentei implementar uma logica d colisão)
-    this.danger1=this.physics.add.staticGroup();
-    this.danger1.create(650, 530, "danger1").setScale(0.5, 0.75).refreshBody();
-    this.danger1.create(200, 530, "danger1").setScale(0.5, 0.75).refreshBody();
+    //this.danger1 = this.physics.add.staticGroup();
+    //this.danger1.create(650, 530, "danger1").setScale(0.5, 0.75).refreshBody();
+    //this.danger1.create(200, 530, "danger1").setScale(0.5, 0.75).refreshBody();
 
     //plataformas
     this.platforms = this.physics.add.staticGroup();
@@ -78,12 +76,12 @@ class playGame extends Phaser.Scene {
     this.physics.add.collider(this.player, this.platforms);
 
     //player2
-    // this.player2 = this.physics.add.sprite(700, 450, "p2");
-    // this.player2.setBounce(0.2);
-    // this.player2.setCollideWorldBounds(true);
-    // this.physics.add.collider(this.player2, this.platforms);
+    this.player2 = this.physics.add.sprite(700, 450, "p2");
+    this.player2.setBounce(0.2);
+    this.player2.setCollideWorldBounds(true);
+    this.physics.add.collider(this.player2, this.platforms);
 
-    //animações p1
+    //animações
     this.anims.create({
       key: "left",
       frames: this.anims.generateFrameNumbers("dude", { start: 0, end: 3 }),
@@ -104,27 +102,6 @@ class playGame extends Phaser.Scene {
       repeat: -1,
     });
 
-    //animações p2
-    // this.anims.create({
-    //   key: "left",
-    //   frames: this.anims.generateFrameNumbers("p2", { start: 0, end: 3 }),
-    //   frameRate: 10,
-    //   repeat: -1,
-    // });
-
-    // this.anims.create({
-    //   key: "turn",
-    //   frames: [{ key: "p2", frame: 4 }],
-    //   frameRate: 20,
-    // });
-
-    // this.anims.create({
-    //   key: "right",
-    //   frames: this.anims.generateFrameNumbers("p2", { start: 5, end: 8 }),
-    //   frameRate: 10,
-    //   repeat: -1,
-    // });
-
     //estrelas
     this.stars = this.physics.add.group({
       key: "star",
@@ -133,7 +110,6 @@ class playGame extends Phaser.Scene {
     });
     // this.stars = this.physics.staticGroup();
     // this.stars.create(400, 0, "ground").setScale(2).refreshBody();
-
 
     this.stars.children.iterate(function (child) {
       child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
@@ -185,8 +161,26 @@ class playGame extends Phaser.Scene {
       this.player.anims.play("turn");
     }
 
+    if (this.keyA.isDown) {
+      this.player2.setVelocityX(-160);
+
+      this.player2.anims.play("left", true);
+    } else if (this.keyD.isDown) {
+      this.player2.setVelocityX(160);
+
+      this.player2.anims.play("right", true);
+    } else {
+      this.player2.setVelocityX(0);
+
+      this.player2.anims.play("turn");
+    }
+
     if (this.cursors.up.isDown && this.player.body.touching.down) {
       this.player.setVelocityY(-330);
+    }
+
+    if (this.keyW.isDown && this.player2.body.touching.down) {
+      this.player2.setVelocityY(-330);
     }
 
     // if(keyA.isDown) {
@@ -226,7 +220,7 @@ class playGame extends Phaser.Scene {
     }
   }
 
-  hitBomb(player, bomb) {
+  hitBomb() {
     this.physics.pause();
     this.player.setTint(0xff0000);
     this.player.anims.play("turn");
