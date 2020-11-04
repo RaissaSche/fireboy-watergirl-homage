@@ -26,11 +26,25 @@ Game.init = function(){
 //         layer = map.createLayer(i);
 //     }
 //     layer.inputEnabled = true; // Allows clicking on the map
+//     layer.events.onInputUp.add(Game.getCoordinates, this);
 //     Client.askNewPlayer();//indica q jogador foi iniciado
 // };
 
+Game.getCoordinates = function(layer,pointer){//mapa reagindo a cliques na tela
+    Client.sendClick(pointer.worldX,pointer.worldY);//saber onde clique ocorreu
+};
+
 Game.addNewPlayer = function(id,x,y){//adiciona sprite na posição xy e armazena sprite correspondente em matriz declarada em game.create conforme id fornecido
     Game.playerMap[id] = game.add.sprite(x,y,'sprite');
+};
+
+Game.movePlayer = function(id,x,y){
+    var player = Game.playerMap[id];
+    var distance = Phaser.Math.distance(player.x,player.y,x,y);
+    var duration = distance*10;
+    var tween = game.add.tween(player);
+    tween.to({x:x,y:y}, duration);
+    tween.start();
 };
 
 Game.removePlayer = function(id){

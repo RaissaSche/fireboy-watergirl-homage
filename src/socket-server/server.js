@@ -28,6 +28,13 @@ io.on('connection',function(socket){//sempre que um cliente se conecta no servid
         socket.emit('allplayers',getAllPlayers());//envia mensagem allplayers para socket+saída gettAllPlayers
         socket.broadcast.emit('newplayer',socket.player);//envia mensagem a todos os sockets conectados exceto o que acionou a chamada de retorno
 
+        socket.on('click',function(data){
+            console.log('click to '+data.x+', '+data.y);
+            socket.player.x = data.x;
+            socket.player.y = data.y;
+            io.emit('move',socket.player);
+        });
+        
         socket.on('disconnect',function(){
             io.emit('remove',socket.player.id);
         });
