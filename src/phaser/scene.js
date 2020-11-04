@@ -36,16 +36,10 @@ class playGame extends Phaser.Scene {
       frameWidth: 32,
       frameHeight: 48,
     });
-
-    // this.load.spritesheet("p2", "assets/p2.png", {
-    //   frameWidth: 32,
-    //   frameHeight: 48,
-    // });
   }
 
   create() {
     this.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
-    // keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
     this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
     this.keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
 
@@ -57,9 +51,9 @@ class playGame extends Phaser.Scene {
     this.door.create(400, 370, "door").setScale(2).refreshBody();
 
     //blocos mortais (tentei implementar uma logica d colisão)
-    //this.danger1 = this.physics.add.staticGroup();
-    //this.danger1.create(650, 530, "danger1").setScale(0.5, 0.75).refreshBody();
-    //this.danger1.create(200, 530, "danger1").setScale(0.5, 0.75).refreshBody();
+    this.danger1 = this.physics.add.staticGroup();
+    this.danger1.create(650, 530, "danger1").setScale(0.5, 0.75).refreshBody();
+    this.danger1.create(200, 530, "danger1").setScale(0.5, 0.75).refreshBody();
 
     //plataformas
     this.platforms = this.physics.add.staticGroup();
@@ -76,7 +70,7 @@ class playGame extends Phaser.Scene {
     this.physics.add.collider(this.player, this.platforms);
 
     //player2
-    this.player2 = this.physics.add.sprite(700, 450, "p2");
+    this.player2 = this.physics.add.sprite(700, 450, "dude");
     this.player2.setBounce(0.2);
     this.player2.setCollideWorldBounds(true);
     this.physics.add.collider(this.player2, this.platforms);
@@ -123,6 +117,14 @@ class playGame extends Phaser.Scene {
       this
     );
 
+    this.physics.add.overlap(
+      this.player2,
+      this.stars,
+      this.collectStar,
+      null,
+      this
+    );
+
     //pontuação
     this.scoreText = this.add.text(16, 16, "score: 0", {
       fontSize: "32px",
@@ -136,6 +138,14 @@ class playGame extends Phaser.Scene {
 
     this.physics.add.collider(
       this.player,
+      this.bombs,
+      this.hitBomb,
+      null,
+      this
+    );
+
+    this.physics.add.collider(
+      this.player2,
       this.bombs,
       this.hitBomb,
       null,
@@ -182,19 +192,6 @@ class playGame extends Phaser.Scene {
     if (this.keyW.isDown && this.player2.body.touching.down) {
       this.player2.setVelocityY(-330);
     }
-
-    // if(keyA.isDown) {
-    //   this.player2.setVelocityX(-160);
-    //   this.player2.anims.play("left", true);
-    // } else if(keyD.isDown) {
-    //   this.player2.setVelocityX(160);
-    //   this.player2.anims.play("right", true);
-    // } else {
-    //   this.player2.setVelocityX(0);
-    //   this.player2.anims.play("turn");
-    // } if(keyW.isDown && this.player2.body.touching.down) {
-    //   this.player2.setVelocityY(-330);
-    // }
   }
 
   collectStar(player, star) {
@@ -223,6 +220,7 @@ class playGame extends Phaser.Scene {
   hitBomb() {
     this.physics.pause();
     this.player.setTint(0xff0000);
+    this.player2.setTint(0xff0000);
     this.player.anims.play("turn");
 
     this.gameOver = true;
