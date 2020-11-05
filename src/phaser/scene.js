@@ -47,9 +47,9 @@ class playGame extends Phaser.Scene {
     this.add.image(400, 300, "sky");
 
     //portas
-    this.door = this.physics.add.staticGroup();
-    this.door.create(375, 70, "door").setScale(2).refreshBody();
-    this.door.create(435, 70, "door").setScale(2).refreshBody();
+    // this.door = this.physics.add.staticGroup();
+    // this.door.create(375, 70, "door").setScale(2).refreshBody();
+    // this.door.create(435, 70, "door").setScale(2).refreshBody();
 
     //plataformas
     this.platforms = this.physics.add.staticGroup();
@@ -71,10 +71,26 @@ class playGame extends Phaser.Scene {
     this.player2.setCollideWorldBounds(true);
     this.physics.add.collider(this.player2, this.platforms);
 
+
     // //portas
-    // this.door = this.physics.add.staticGroup();
-    // this.door.create(375, 70, "door").setScale(2).refreshBody();
+    this.door = this.physics.add.staticGroup();
+    this.physics.add.collider(
+      this.player,
+      this.door,
+      this.colideDoor,
+      null,
+      this
+    );
+    this.physics.add.collider(
+      this.player2,
+      this.door,
+      this.colideDoor,
+      null,
+      this
+    );
+    this.door.create(375, 60, "door").setScale(2).refreshBody();
     // this.door.create(435, 70, "door").setScale(2).refreshBody();
+
 
     //blocos mortais
     this.danger1 = this.physics.add.staticGroup();
@@ -269,6 +285,22 @@ class playGame extends Phaser.Scene {
     this.player.anims.play("turn");
 
     this.gameOver = true;
+  }
+
+  colideDoor() {
+    //var collider = Game.scene.physics.add.collider(Game.player, layer);
+    if (this.score >= 60){
+      this.physics.pause();
+      this.player.setTint(0xfff000);
+      this.player2.setTint(0xfff000);
+      this.player.anims.play("turn");
+      this.player2.anims.play("turn");
+      this.gameOver = true;
+    }
+    else{ //desativar colisão
+      //Game.door.body.enableBody=false;
+      //collider.active = false;
+    }
   }
 }
 
