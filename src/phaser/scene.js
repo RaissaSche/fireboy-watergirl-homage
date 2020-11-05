@@ -48,12 +48,8 @@ class playGame extends Phaser.Scene {
 
     //portas
     this.door = this.physics.add.staticGroup();
-    this.door.create(400, 370, "door").setScale(2).refreshBody();
-
-    //blocos mortais (tentei implementar uma logica d colisão)
-    this.danger1 = this.physics.add.staticGroup();
-    this.danger1.create(650, 530, "danger1").setScale(0.5, 0.75).refreshBody();
-    this.danger1.create(200, 530, "danger1").setScale(0.5, 0.75).refreshBody();
+    this.door.create(375, 70, "door").setScale(2).refreshBody();
+    this.door.create(435, 70, "door").setScale(2).refreshBody();
 
     //plataformas
     this.platforms = this.physics.add.staticGroup();
@@ -70,10 +66,38 @@ class playGame extends Phaser.Scene {
     this.physics.add.collider(this.player, this.platforms);
 
     //player2
-    this.player2 = this.physics.add.sprite(700, 450, "dude");
+    this.player2 = this.physics.add.sprite(740, 450, "dude");
     this.player2.setBounce(0.2);
     this.player2.setCollideWorldBounds(true);
     this.physics.add.collider(this.player2, this.platforms);
+
+    // //portas
+    // this.door = this.physics.add.staticGroup();
+    // this.door.create(375, 70, "door").setScale(2).refreshBody();
+    // this.door.create(435, 70, "door").setScale(2).refreshBody();
+
+    //blocos mortais
+    this.danger1 = this.physics.add.staticGroup();
+    //this.physics.add.collider(this.danger1, this.platforms);
+    this.physics.add.collider(
+      this.player,
+      this.danger1,
+      this.colideBlock,
+      null,
+      this
+    );
+    this.danger1.create(200, 530, "danger1").setScale(0.5, 0.75).refreshBody();
+    
+    this.danger2 = this.physics.add.staticGroup();
+    //this.physics.add.collider(this.danger2, this.platforms);
+    this.physics.add.collider(
+      this.player2,
+      this.danger2,
+      this.colideBlock,
+      null,
+      this
+    );
+    this.danger2.create(580, 530, "danger2").setScale(0.5, 0.75).refreshBody();
 
     //animações
     this.anims.create({
@@ -97,14 +121,22 @@ class playGame extends Phaser.Scene {
     });
 
     //estrelas
-    this.stars = this.physics.add.group({
-      key: "star",
-      repeat: 4,
-      setXY: { x: 100, y: 0, stepX: 150 },
-    });
-    // this.stars = this.physics.staticGroup();
-    // this.stars.create(400, 0, "ground").setScale(2).refreshBody();
+    // this.stars = this.physics.add.group({
+    //   key: "star",
+    //   repeat: 4,
+    //   setXY: { x: 100, y: 0, stepX: 150 },
+    // });
+    this.stars = this.physics.add. group();
+    this.stars.create(200, 290, "star");
+    this.stars.create(600, 290, "star");
+    this.stars.create(70, 100, "star");
+    this.stars.create(730, 100, "star");
+    this.stars.create(300, 300, "star");
+    this.stars.create(500, 300, "star");
 
+    // this.stars.children.iterate(function (child) {
+    //   child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+    // });
     this.stars.children.iterate(function (child) {
       child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
     });
@@ -192,6 +224,10 @@ class playGame extends Phaser.Scene {
     if (this.keyW.isDown && this.player2.body.touching.down) {
       this.player2.setVelocityY(-330);
     }
+
+    //var dan1 = this.danger1.create(200, 530, "danger1").setScale(0.5, 0.75).refreshBody();;
+    //dan1.setCollideWorldBounds(true);
+
   }
 
   collectStar(player, star) {
@@ -210,14 +246,23 @@ class playGame extends Phaser.Scene {
           ? Phaser.Math.Between(400, 800)
           : Phaser.Math.Between(0, 400);
 
-      var bomb = this.bombs.create(x, 16, "bomb");
-      bomb.setBounce(1);
-      bomb.setCollideWorldBounds(true);
-      bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+      // var bomb = this.bombs.create(x, 16, "bomb");
+      // bomb.setBounce(1);
+      // bomb.setCollideWorldBounds(true);
+      // bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
     }
   }
 
   hitBomb() {
+    this.physics.pause();
+    this.player.setTint(0xff0000);
+    this.player2.setTint(0xff0000);
+    this.player.anims.play("turn");
+
+    this.gameOver = true;
+  }
+
+  colideBlock() {
     this.physics.pause();
     this.player.setTint(0xff0000);
     this.player2.setTint(0xff0000);
