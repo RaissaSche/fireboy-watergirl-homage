@@ -19,6 +19,8 @@ class playGame extends Phaser.Scene {
     this.keyA;
     this.keyD;
     this.keyW;
+
+    this.pass = 0;
   }
 
   preload() {
@@ -84,11 +86,11 @@ class playGame extends Phaser.Scene {
     this.physics.add.collider(
       this.player2,
       this.door,
-      this.colideDoor,
+      this.colideDoorAgain,
       null,
       this
     );
-    this.door.create(375, 60, "door").setScale(2).refreshBody();
+    this.door.create(400, 60, "door").setScale(2).refreshBody();
     // this.door.create(435, 70, "door").setScale(2).refreshBody();
 
 
@@ -244,6 +246,8 @@ class playGame extends Phaser.Scene {
     //var dan1 = this.danger1.create(200, 530, "danger1").setScale(0.5, 0.75).refreshBody();;
     //dan1.setCollideWorldBounds(true);
 
+    this.checkPass();
+
   }
 
   collectStar(player, star) {
@@ -252,21 +256,21 @@ class playGame extends Phaser.Scene {
     this.score += 10;
     this.scoreText.setText("Score: " + this.score);
 
-    if (this.stars.countActive(true) === 0) {
-      this.stars.children.iterate(function (child) {
-        child.enableBody(true, child.x, 0, true, true);
-      });
+    // if (this.stars.countActive(true) === 0) {
+    //   this.stars.children.iterate(function (child) {
+    //     child.enableBody(true, child.x, 0, true, true);
+    //   });
 
-      var x =
-        player.x < 400
-          ? Phaser.Math.Between(400, 800)
-          : Phaser.Math.Between(0, 400);
+      // var x =
+      //   player.x < 400
+      //     ? Phaser.Math.Between(400, 800)
+      //     : Phaser.Math.Between(0, 400);
 
       // var bomb = this.bombs.create(x, 16, "bomb");
       // bomb.setBounce(1);
       // bomb.setCollideWorldBounds(true);
       // bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
-    }
+    //}
   }
 
   hitBomb() {
@@ -290,16 +294,40 @@ class playGame extends Phaser.Scene {
   colideDoor() {
     //var collider = Game.scene.physics.add.collider(Game.player, layer);
     if (this.score >= 60){
-      this.physics.pause();
+      //this.physics.pause();
       this.player.setTint(0xfff000);
-      this.player2.setTint(0xfff000);
+      //this.player2.setTint(0xfff000);
       this.player.anims.play("turn");
-      this.player2.anims.play("turn");
-      this.gameOver = true;
+      this.player.disableBody(true,true);
+      //this.player2.anims.play("turn");
+      //this.gameOver = true;
+      this.pass+=1;
     }
     else{ //desativar colisão
       //Game.door.body.enableBody=false;
       //collider.active = false;
+    }
+  }
+
+  colideDoorAgain() {
+    if (this.score >= 60){
+      this.player2.setTint(0xfff000);
+      this.player2.anims.play("turn");
+      this.player2.disableBody(true,true);
+      this.pass+=1;
+    }
+    else
+    {
+
+    }
+  }
+
+  checkPass()
+  {
+    if (this.pass === 2) {
+      //this.physics.pause();
+      //this.door.disableBody(true,true);
+      this.gameOver = true;
     }
   }
 }
