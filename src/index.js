@@ -1,8 +1,9 @@
 import Phaser from "phaser";
 import React from "react";
 import ReactDOM from "react-dom";
-import App from "./components/App.js";
-import playGame from "./phaser/scene";
+import App from "./react/App.js";
+import menu from "./phaser/menu";
+import playGame from "./phaser/playGame";
 
 //console.log(App);
 
@@ -23,7 +24,7 @@ export const config = {
     width: 800,
     height: 600,
   },
-  scene: playGame,
+  scene: [menu, playGame],
 };
 
 const game = new Phaser.Game(config);

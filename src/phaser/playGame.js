@@ -1,29 +1,35 @@
 import Phaser from "phaser";
 import logoImg from "../assets/logo.png";
+import socketIOClient from "socket.io-client";
+const ENDPOINT = "http://127.0.0.1:4001";
 
 class playGame extends Phaser.Scene {
   constructor() {
-    super("PlayGame");
-    this.platforms;
-    this.player;
-    this.player2;
-    this.cursors;
-    this.stars;
+    super({ key: "playGame" });
     this.score = 0;
-    this.scoreText;
-    this.gameOver = false;
-    this.door;
-    this.danger1;
-    this.danger2;
-
-    this.keyA;
-    this.keyD;
-    this.keyW;
-
     this.pass = 0;
+    this.PosX1 = 50;
+    this.PosY1 = 450;
+    this.PosX2 = 740;
+    this.PosY2 = 450;
+    this.gameOver = false;
+    this.socket = socketIOClient(ENDPOINT);
+  }
+
+  client() {
+    const _this = this;
+    this.socket.on("FromAPI", (data) => {
+      _this.id = data.id;
+      _this.PosX1 = data.posX1; //50
+      _this.PosY1 = data.posY1; //450
+      _this.PosX2 = data.posX2; //740
+      _this.PosY2 = data.posY2; //450
+    });
   }
 
   preload() {
+    this.client();
+
     this.load.image("logo", logoImg);
     this.load.image("sky", "assets/sky.png");
     this.load.image("ground", "assets/platform.png");
@@ -61,20 +67,25 @@ class playGame extends Phaser.Scene {
     this.platforms.create(750, 250, "ground").setScale(0.3, 1).refreshBody();
     this.platforms.create(400, 100, "ground").setScale(0.6, 0.5).refreshBody();
 
+    console.log("id: " + this.id);
+
     //player1
-    this.player = this.physics.add.sprite(50, 450, "dude");
+    this.player = this.physics.add.sprite(this.PosX1, this.PosY1, "dude");
+    console.log("player1: " + this.player.x + " " + this.player.y);
     this.player.setBounce(0.2);
     this.player.setCollideWorldBounds(true);
     this.physics.add.collider(this.player, this.platforms);
+    this.player.setTint(0x00ffff);
 
     //player2
-    this.player2 = this.physics.add.sprite(740, 450, "dude");
+    this.player2 = this.physics.add.sprite(this.PosX2, this.PosY2, "dude");
+    console.log("player2: " + this.player2.x + " " + this.player2.y);
     this.player2.setBounce(0.2);
     this.player2.setCollideWorldBounds(true);
     this.physics.add.collider(this.player2, this.platforms);
+    this.player2.setTint(0xff0000);
 
-
-    // //portas
+    //portas
     this.door = this.physics.add.staticGroup();
     this.physics.add.collider(
       this.player,
@@ -93,10 +104,8 @@ class playGame extends Phaser.Scene {
     this.door.create(400, 60, "door").setScale(2).refreshBody();
     // this.door.create(435, 70, "door").setScale(2).refreshBody();
 
-
     //blocos mortais
     this.danger1 = this.physics.add.staticGroup();
-    //this.physics.add.collider(this.danger1, this.platforms);
     this.physics.add.collider(
       this.player,
       this.danger1,
@@ -105,9 +114,9 @@ class playGame extends Phaser.Scene {
       this
     );
     this.danger1.create(200, 530, "danger1").setScale(0.5, 0.75).refreshBody();
-    
+    this.danger1.create(750, 230, "danger1").setScale(0.3, 0.5).refreshBody();
+
     this.danger2 = this.physics.add.staticGroup();
-    //this.physics.add.collider(this.danger2, this.platforms);
     this.physics.add.collider(
       this.player2,
       this.danger2,
@@ -116,6 +125,7 @@ class playGame extends Phaser.Scene {
       this
     );
     this.danger2.create(580, 530, "danger2").setScale(0.5, 0.75).refreshBody();
+    this.danger2.create(50, 230, "danger2").setScale(0.3, 0.5).refreshBody();
 
     //animações
     this.anims.create({
@@ -139,12 +149,7 @@ class playGame extends Phaser.Scene {
     });
 
     //estrelas
-    // this.stars = this.physics.add.group({
-    //   key: "star",
-    //   repeat: 4,
-    //   setXY: { x: 100, y: 0, stepX: 150 },
-    // });
-    this.stars = this.physics.add. group();
+    this.stars = this.physics.add.group();
     this.stars.create(200, 290, "star");
     this.stars.create(600, 290, "star");
     this.stars.create(70, 100, "star");
@@ -152,12 +157,10 @@ class playGame extends Phaser.Scene {
     this.stars.create(300, 300, "star");
     this.stars.create(500, 300, "star");
 
-    // this.stars.children.iterate(function (child) {
-    //   child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-    // });
     this.stars.children.iterate(function (child) {
       child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
     });
+
     this.physics.add.collider(this.stars, this.platforms);
     this.physics.add.overlap(
       this.player,
@@ -182,7 +185,7 @@ class playGame extends Phaser.Scene {
     });
 
     //bombas
-    this.bombs = this.physics.add.group();
+    /*this.bombs = this.physics.add.group();
 
     this.physics.add.collider(this.bombs, this.platforms);
 
@@ -201,6 +204,7 @@ class playGame extends Phaser.Scene {
       null,
       this
     );
+    */
   }
 
   update() {
@@ -248,6 +252,15 @@ class playGame extends Phaser.Scene {
 
     this.checkPass();
 
+    let playersPos = [
+      this.player.x,
+      this.player.y,
+      this.player2.x,
+      this.player2.y,
+    ];
+
+    this.socket.emit("hey", playersPos);
+    console.log("playersPos: " + playersPos);
   }
 
   collectStar(player, star) {
@@ -261,22 +274,22 @@ class playGame extends Phaser.Scene {
     //     child.enableBody(true, child.x, 0, true, true);
     //   });
 
-      // var x =
-      //   player.x < 400
-      //     ? Phaser.Math.Between(400, 800)
-      //     : Phaser.Math.Between(0, 400);
+    // var x =
+    //   player.x < 400
+    //     ? Phaser.Math.Between(400, 800)
+    //     : Phaser.Math.Between(0, 400);
 
-      // var bomb = this.bombs.create(x, 16, "bomb");
-      // bomb.setBounce(1);
-      // bomb.setCollideWorldBounds(true);
-      // bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+    // var bomb = this.bombs.create(x, 16, "bomb");
+    // bomb.setBounce(1);
+    // bomb.setCollideWorldBounds(true);
+    // bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
     //}
   }
 
   hitBomb() {
     this.physics.pause();
-    this.player.setTint(0xff0000);
-    this.player2.setTint(0xff0000);
+    this.player.setTint(0xff00ff);
+    this.player2.setTint(0xff00ff);
     this.player.anims.play("turn");
 
     this.gameOver = true;
@@ -284,8 +297,8 @@ class playGame extends Phaser.Scene {
 
   colideBlock() {
     this.physics.pause();
-    this.player.setTint(0xff0000);
-    this.player2.setTint(0xff0000);
+    this.player.setTint(0xff00ff);
+    this.player2.setTint(0xff00ff);
     this.player.anims.play("turn");
 
     this.gameOver = true;
@@ -293,37 +306,33 @@ class playGame extends Phaser.Scene {
 
   colideDoor() {
     //var collider = Game.scene.physics.add.collider(Game.player, layer);
-    if (this.score >= 60){
+    if (this.score >= 60) {
       //this.physics.pause();
       this.player.setTint(0xfff000);
       //this.player2.setTint(0xfff000);
       this.player.anims.play("turn");
-      this.player.disableBody(true,true);
+      this.player.disableBody(true, true);
       //this.player2.anims.play("turn");
       //this.gameOver = true;
-      this.pass+=1;
-    }
-    else{ //desativar colisão
+      this.pass += 1;
+    } else {
+      //desativar colisão
       //Game.door.body.enableBody=false;
       //collider.active = false;
     }
   }
 
   colideDoorAgain() {
-    if (this.score >= 60){
+    if (this.score >= 60) {
       this.player2.setTint(0xfff000);
       this.player2.anims.play("turn");
-      this.player2.disableBody(true,true);
-      this.pass+=1;
-    }
-    else
-    {
-
+      this.player2.disableBody(true, true);
+      this.pass += 1;
+    } else {
     }
   }
 
-  checkPass()
-  {
+  checkPass() {
     if (this.pass === 2) {
       //this.physics.pause();
       //this.door.disableBody(true,true);
