@@ -8,10 +8,9 @@ class playGame extends Phaser.Scene {
     super({ key: "playGame" });
     this.score = 0;
     this.pass = 0;
-    this.PosX1 = 50;
-    this.PosY1 = 450;
-    this.PosX2 = 740;
-    this.PosY2 = 450;
+    this.id = -1;
+    this.playersPos = [this.id, 50, 450, 740, 450];
+    this.lastPlayersPos = this.playersPos;
     this.gameOver = false;
     this.socket = socketIOClient(ENDPOINT);
   }
@@ -20,16 +19,14 @@ class playGame extends Phaser.Scene {
     const _this = this;
     this.socket.on("FromAPI", (data) => {
       _this.id = data.id;
-      _this.PosX1 = data.posX1; //50
-      _this.PosY1 = data.posY1; //450
-      _this.PosX2 = data.posX2; //740
-      _this.PosY2 = data.posY2; //450
+      _this.playersPos[0] = data.posX1; //50
+      _this.playersPos[1] = data.posY1; //450
+      _this.playersPos[2] = data.posX2; //740
+      _this.playersPos[3] = data.posY2; //450
     });
   }
 
   preload() {
-    this.client();
-
     this.load.image("logo", logoImg);
     this.load.image("sky", "assets/sky.png");
     this.load.image("ground", "assets/platform.png");
@@ -70,7 +67,11 @@ class playGame extends Phaser.Scene {
     console.log("id: " + this.id);
 
     //player1
-    this.player = this.physics.add.sprite(this.PosX1, this.PosY1, "dude");
+    this.player = this.physics.add.sprite(
+      this.playersPos[1],
+      this.playersPos[2],
+      "dude"
+    );
     console.log("player1: " + this.player.x + " " + this.player.y);
     this.player.setBounce(0.2);
     this.player.setCollideWorldBounds(true);
@@ -78,7 +79,11 @@ class playGame extends Phaser.Scene {
     this.player.setTint(0x00ffff);
 
     //player2
-    this.player2 = this.physics.add.sprite(this.PosX2, this.PosY2, "dude");
+    this.player2 = this.physics.add.sprite(
+      this.playersPos[3],
+      this.playersPos[4],
+      "dude"
+    );
     console.log("player2: " + this.player2.x + " " + this.player2.y);
     this.player2.setBounce(0.2);
     this.player2.setCollideWorldBounds(true);
@@ -208,34 +213,30 @@ class playGame extends Phaser.Scene {
   }
 
   update() {
+    this.client();
+
     //movimentação
     this.cursors = this.input.keyboard.createCursorKeys();
 
     if (this.cursors.left.isDown) {
       this.player.setVelocityX(-160);
-
       this.player.anims.play("left", true);
     } else if (this.cursors.right.isDown) {
       this.player.setVelocityX(160);
-
       this.player.anims.play("right", true);
     } else {
       this.player.setVelocityX(0);
-
       this.player.anims.play("turn");
     }
 
     if (this.keyA.isDown) {
       this.player2.setVelocityX(-160);
-
       this.player2.anims.play("left", true);
     } else if (this.keyD.isDown) {
       this.player2.setVelocityX(160);
-
       this.player2.anims.play("right", true);
     } else {
       this.player2.setVelocityX(0);
-
       this.player2.anims.play("turn");
     }
 
@@ -252,15 +253,7 @@ class playGame extends Phaser.Scene {
 
     this.checkPass();
 
-    let playersPos = [
-      this.player.x,
-      this.player.y,
-      this.player2.x,
-      this.player2.y,
-    ];
-
-    // this.socket.emit("hey", playersPos);
-    // console.log("playersPos: " + playersPos);
+    this.emittingProcess();
   }
 
   collectStar(player, star) {
@@ -338,6 +331,33 @@ class playGame extends Phaser.Scene {
       //this.door.disableBody(true,true);
       this.gameOver = true;
     }
+  }
+
+  checkIfArraysAreDifferent(a, b) {
+    debugger;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  emittingProcess() {
+    let playersPos = [
+      this.id,
+      this.player.x,
+      this.player.y,
+      this.player2.x,
+      this.player2.y,
+    ];
+
+    if (this.checkIfArraysAreDifferent(this.lastPlayersPos, playersPos)) {
+      this.socket.emit("hey", playersPos);
+      console.log("playersPos: " + this.lastPlayersPos + "//" + playersPos);
+    }
+
+    this.lastPlayersPos = playersPos;
   }
 }
 
