@@ -24,7 +24,7 @@ export const config = {
     width: 800,
     height: 600,
   },
-  scene: [menu, playGame],
+  scene: [playGame],
 };
 
 const game = new Phaser.Game(config);

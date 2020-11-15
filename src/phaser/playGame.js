@@ -259,8 +259,8 @@ class playGame extends Phaser.Scene {
       this.player2.y,
     ];
 
-    this.socket.emit("hey", playersPos);
-    console.log("playersPos: " + playersPos);
+    // this.socket.emit("hey", playersPos);
+    // console.log("playersPos: " + playersPos);
   }
 
   collectStar(player, star) {

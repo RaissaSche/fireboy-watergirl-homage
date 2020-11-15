@@ -21,19 +21,19 @@ io.on('connection',function(socket){//sempre que um cliente se conecta no servid
     socket.on('newplayer',function(){//especifica retorno de chamada que lida com diferentes mensagens
         socket.player = {//criação de objeto personalizado que represenda o jogador
             id: server.lastPlayderID++,//id do jogador
-            x: randomInt(100,400),//posições x y do jogador
-            y: randomInt(100,400)
+            //x: randomInt(100,400),//posições x y do jogador
+            //y: randomInt(100,400)
         };
         //enviar jogador para lista de jogadores conectados
         socket.emit('allplayers',getAllPlayers());//envia mensagem allplayers para socket+saída gettAllPlayers
         socket.broadcast.emit('newplayer',socket.player);//envia mensagem a todos os sockets conectados exceto o que acionou a chamada de retorno
 
-        socket.on('click',function(data){
-            console.log('click to '+data.x+', '+data.y);
-            socket.player.x = data.x;
-            socket.player.y = data.y;
-            io.emit('move',socket.player);
-        });
+        // socket.on('click',function(data){
+        //     console.log('click to '+data.x+', '+data.y);
+        //     socket.player.x = data.x;
+        //     socket.player.y = data.y;
+        //     io.emit('move',socket.player);
+        // });
         
         socket.on('disconnect',function(){
             io.emit('remove',socket.player.id);

@@ -36,7 +36,7 @@ const getApiAndEmit = (socket) => {
     posY2: playersPos[3],
   };
   // Emitting a new message. Will be consumed by the client
-  socket.emit("FromAPI", response);
+  io.emit("FromAPI", response);
 };
 
 io.on("connection", (socket) => {
@@ -47,7 +47,15 @@ io.on("connection", (socket) => {
     playersPos[1] = data[1];
     playersPos[2] = data[2];
     playersPos[3] = data[3];
+
+    io.emit("hey", data);
   });
 });
+
+// io.on("connection", (socket)=>{
+//   socket.on("move", (msg)=>{
+//     io.emit("move", msg);
+//   });
+// });
 
 server.listen(port, () => console.log(`Listening on port ${port}`));
