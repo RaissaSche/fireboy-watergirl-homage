@@ -218,33 +218,37 @@ class playGame extends Phaser.Scene {
     //movimentação
     this.cursors = this.input.keyboard.createCursorKeys();
 
-    if (this.cursors.left.isDown) {
+    if (this.cursors.left.isDown && this.id === 0) {
       this.player.setVelocityX(-160);
       this.player.anims.play("left", true);
-    } else if (this.cursors.right.isDown) {
+    } else if (this.cursors.right.isDown && this.id === 0) {
       this.player.setVelocityX(160);
       this.player.anims.play("right", true);
-    } else {
+    } else if (this.id === 0) {
       this.player.setVelocityX(0);
       this.player.anims.play("turn");
     }
 
-    if (this.keyA.isDown) {
+    if (
+      this.cursors.up.isDown &&
+      this.player.body.touching.down &&
+      this.id === 0
+    ) {
+      this.player.setVelocityY(-330);
+    }
+
+    if (this.keyA.isDown && this.id === 1) {
       this.player2.setVelocityX(-160);
       this.player2.anims.play("left", true);
-    } else if (this.keyD.isDown) {
+    } else if (this.keyD.isDown && this.id === 1) {
       this.player2.setVelocityX(160);
       this.player2.anims.play("right", true);
-    } else {
+    } else if (this.id === 1) {
       this.player2.setVelocityX(0);
       this.player2.anims.play("turn");
     }
 
-    if (this.cursors.up.isDown && this.player.body.touching.down) {
-      this.player.setVelocityY(-330);
-    }
-
-    if (this.keyW.isDown && this.player2.body.touching.down) {
+    if (this.keyW.isDown && this.player2.body.touching.down && this.id === 1) {
       this.player2.setVelocityY(-330);
     }
 
@@ -308,11 +312,11 @@ class playGame extends Phaser.Scene {
       //this.player2.anims.play("turn");
       //this.gameOver = true;
       this.pass += 1;
-    } else {
-      //desativar colisão
-      //Game.door.body.enableBody=false;
-      //collider.active = false;
-    }
+    } //else {
+    //desativar colisão
+    //Game.door.body.enableBody=false;
+    //collider.active = false;
+    //}
   }
 
   colideDoorAgain() {
@@ -321,7 +325,6 @@ class playGame extends Phaser.Scene {
       this.player2.anims.play("turn");
       this.player2.disableBody(true, true);
       this.pass += 1;
-    } else {
     }
   }
 
@@ -334,7 +337,6 @@ class playGame extends Phaser.Scene {
   }
 
   checkIfArraysAreDifferent(a, b) {
-    debugger;
     for (var i = 0; i < a.length; i++) {
       if (a[i] != b[i]) {
         return true;
@@ -344,17 +346,19 @@ class playGame extends Phaser.Scene {
   }
 
   emittingProcess() {
-    let playersPos = [
-      this.id,
-      this.player.x,
-      this.player.y,
-      this.player2.x,
-      this.player2.y,
-    ];
+    let playersPos = [0, 50, 450];
+
+    if (this.id === 0) {
+      playersPos = [this.id, this.player.x, this.player.y];
+    } else if (this.id === 1) {
+      playersPos = [this.id, this.player2.x, this.player2.y];
+    }
 
     if (this.checkIfArraysAreDifferent(this.lastPlayersPos, playersPos)) {
       this.socket.emit("hey", playersPos);
-      console.log("playersPos: " + this.lastPlayersPos + "//" + playersPos);
+      console.log(
+        "playersPos: " + this.lastPlayersPos[0] + " // " + playersPos[0]
+      );
     }
 
     this.lastPlayersPos = playersPos;

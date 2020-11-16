@@ -21,7 +21,7 @@ let player2Pos = [740, 450];
 io.on("connection", (socket) => {
   console.log("New client connected");
 
-  if (socketId1 === -1) {
+  if (socketId1 === -1 && socketId2 !== socket.id) {
     socketId1 = socket.id;
   }
   if (socketId2 === -1 && socketId1 !== socket.id) {
@@ -59,11 +59,22 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log("Client disconnected");
+
+    if (socket.id === socketId1) {
+      socketId1 = -1;
+    }
+
+    if (socket.id === socketId2) {
+      socketId2 = -1;
+    }
+
+    console.log(socketId1, socketId2);
+
     interval = "";
   });
 });
 
-const getApiAndEmit = (socket) => {
+const getApiAndEmit = () => {
   const response = {
     id: 0,
     posX1: player1Pos[0],
@@ -71,6 +82,7 @@ const getApiAndEmit = (socket) => {
     posX2: player2Pos[0],
     posY2: player2Pos[1],
   };
+
   const response2 = {
     id: 1,
     posX1: player1Pos[0],
@@ -83,11 +95,5 @@ const getApiAndEmit = (socket) => {
   io.to("player1").emit("FromAPI", response);
   io.to("player2").emit("FromAPI", response2);
 };
-
-// io.on("connection", (socket)=>{
-//   socket.on("move", (msg)=>{
-//     io.emit("move", msg);
-//   });
-// });
 
 server.listen(port, () => console.log(`Listening on port ${port}`));
