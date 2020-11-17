@@ -9,8 +9,10 @@ class playGame extends Phaser.Scene {
     this.score = 0;
     this.pass = 0;
     this.id = -1;
-    this.playersPos = [this.id, 50, 450, 740, 450];
-    this.lastPlayersPos = this.playersPos;
+    this.playerPos = [this.id, 50, 450];
+    this.otherPlayerPos = [this.id, 740, 450];
+    this.activeStars = [true, true, true, true, true, true];
+    this.gameInfo = [this.id, 50, 450, true, true, true, true, true, true];
     this.gameOver = false;
     this.socket = socketIOClient(ENDPOINT);
   }
@@ -19,10 +21,14 @@ class playGame extends Phaser.Scene {
     const _this = this;
     this.socket.on("FromAPI", (data) => {
       _this.id = data.id;
-      _this.playersPos[0] = data.posX1; //50
-      _this.playersPos[1] = data.posY1; //450
-      _this.playersPos[2] = data.posX2; //740
-      _this.playersPos[3] = data.posY2; //450
+      _this.otherPlayerPos[1] = data.posX;
+      _this.otherPlayerPos[2] = data.posY;
+      _this.activeStars[0] = data.star1;
+      _this.activeStars[1] = data.star2;
+      _this.activeStars[2] = data.star3;
+      _this.activeStars[3] = data.star4;
+      _this.activeStars[4] = data.star5;
+      _this.activeStars[5] = data.star6;
     });
   }
 
@@ -66,10 +72,14 @@ class playGame extends Phaser.Scene {
 
     console.log("id: " + this.id);
 
+    if (this.id === 1) {
+      this.playerPos = [1, 740, 450];
+    }
+
     //player1
     this.player = this.physics.add.sprite(
-      this.playersPos[1],
-      this.playersPos[2],
+      this.playerPos[1],
+      this.playerPos[2],
       "dude"
     );
     console.log("player1: " + this.player.x + " " + this.player.y);
@@ -80,8 +90,8 @@ class playGame extends Phaser.Scene {
 
     //player2
     this.player2 = this.physics.add.sprite(
-      this.playersPos[3],
-      this.playersPos[4],
+      this.otherPlayerPos[1],
+      this.otherPlayerPos[2],
       "dude"
     );
     console.log("player2: " + this.player2.x + " " + this.player2.y);
@@ -102,7 +112,7 @@ class playGame extends Phaser.Scene {
     this.physics.add.collider(
       this.player2,
       this.door,
-      this.colideDoorAgain,
+      this.colideDoor,
       null,
       this
     );
@@ -215,6 +225,14 @@ class playGame extends Phaser.Scene {
   update() {
     this.client();
 
+    if (this.id === 0) {
+      this.player2.x = this.otherPlayerPos[1];
+      this.player2.y = this.otherPlayerPos[2];
+    } else if (this.id === 1) {
+      this.player.x = this.otherPlayerPos[1];
+      this.player.y = this.otherPlayerPos[2];
+    }
+
     //movimentação
     this.cursors = this.input.keyboard.createCursorKeys();
 
@@ -255,16 +273,36 @@ class playGame extends Phaser.Scene {
     //var dan1 = this.danger1.create(200, 530, "danger1").setScale(0.5, 0.75).refreshBody();;
     //dan1.setCollideWorldBounds(true);
 
-    this.checkPass();
+    if (this.id != -1) {
+      for (let i = 0; i < this.activeStars.length; i++) {
+        if (this.activeStars[i] === false) {
+          this.stars.children.entries[i].disableBody(true, true);
+        }
+      }
+    }
+
+    if (this.gameOver === false) {
+      let score = 0;
+      for (let i = 0; i < this.activeStars.length; i++) {
+        if (this.activeStars[i] === false) {
+          score += 10;
+        }
+      }
+      this.score = score;
+      this.scoreText.setText("Score: " + this.score);
+    }
 
     this.emittingProcess();
   }
 
   collectStar(player, star) {
-    star.disableBody(true, true);
+    //star.disableBody(true, true);
 
-    this.score += 10;
-    this.scoreText.setText("Score: " + this.score);
+    for (let i = 0; i < this.stars.children.entries.length; i++) {
+      if (this.stars.children.entries[i] === star) {
+        this.activeStars[i] = false;
+      }
+    }
 
     // if (this.stars.countActive(true) === 0) {
     //   this.stars.children.iterate(function (child) {
@@ -305,10 +343,13 @@ class playGame extends Phaser.Scene {
     //var collider = Game.scene.physics.add.collider(Game.player, layer);
     if (this.score >= 60) {
       //this.physics.pause();
-      this.player.setTint(0xfff000);
+      //this.player.setTint(0xfff000);
       //this.player2.setTint(0xfff000);
-      this.player.anims.play("turn");
+      //this.player.anims.play("turn");
+      this.gameOver = true;
       this.player.disableBody(true, true);
+      this.player2.disableBody(true, true);
+      this.scoreText.setText("Parabéns, Player " + (this.id + 1) + "!");
       //this.player2.anims.play("turn");
       //this.gameOver = true;
       this.pass += 1;
@@ -317,23 +358,6 @@ class playGame extends Phaser.Scene {
     //Game.door.body.enableBody=false;
     //collider.active = false;
     //}
-  }
-
-  colideDoorAgain() {
-    if (this.score >= 60) {
-      this.player2.setTint(0xfff000);
-      this.player2.anims.play("turn");
-      this.player2.disableBody(true, true);
-      this.pass += 1;
-    }
-  }
-
-  checkPass() {
-    if (this.pass === 2) {
-      //this.physics.pause();
-      //this.door.disableBody(true,true);
-      this.gameOver = true;
-    }
   }
 
   checkIfArraysAreDifferent(a, b) {
@@ -346,22 +370,39 @@ class playGame extends Phaser.Scene {
   }
 
   emittingProcess() {
-    let playersPos = [0, 50, 450];
+    let gameInfo = [this.id, 50, 450, true, true, true, true, true, true];
 
     if (this.id === 0) {
-      playersPos = [this.id, this.player.x, this.player.y];
+      gameInfo = [
+        this.id,
+        this.player.x,
+        this.player.y,
+        this.activeStars[0],
+        this.activeStars[1],
+        this.activeStars[2],
+        this.activeStars[3],
+        this.activeStars[4],
+        this.activeStars[5],
+      ];
     } else if (this.id === 1) {
-      playersPos = [this.id, this.player2.x, this.player2.y];
+      gameInfo = [
+        this.id,
+        this.player2.x,
+        this.player2.y,
+        this.activeStars[0],
+        this.activeStars[1],
+        this.activeStars[2],
+        this.activeStars[3],
+        this.activeStars[4],
+        this.activeStars[5],
+      ];
     }
 
-    if (this.checkIfArraysAreDifferent(this.lastPlayersPos, playersPos)) {
-      this.socket.emit("hey", playersPos);
-      console.log(
-        "playersPos: " + this.lastPlayersPos[0] + " // " + playersPos[0]
-      );
+    if (this.checkIfArraysAreDifferent(this.gameInfo, gameInfo)) {
+      this.socket.emit("hey", gameInfo);
     }
 
-    this.lastPlayersPos = playersPos;
+    this.gameInfo = gameInfo;
   }
 }
 
