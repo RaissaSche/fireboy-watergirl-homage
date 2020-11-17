@@ -51,8 +51,6 @@ io.on("connection", (socket) => {
   interval = setInterval(() => getApiAndEmit(socket), 1000);
 
   socket.on("hey", (data) => {
-    //console.log(data);
-
     if (data[0] === 0) {
       player1Pos[0] = data[1];
       player1Pos[1] = data[2];

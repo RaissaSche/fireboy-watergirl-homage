@@ -57,11 +57,6 @@ class playGame extends Phaser.Scene {
     //fundo
     this.add.image(400, 300, "sky");
 
-    //portas
-    // this.door = this.physics.add.staticGroup();
-    // this.door.create(375, 70, "door").setScale(2).refreshBody();
-    // this.door.create(435, 70, "door").setScale(2).refreshBody();
-
     //plataformas
     this.platforms = this.physics.add.staticGroup();
     this.platforms.create(400, 568, "ground").setScale(2).refreshBody();
@@ -69,8 +64,6 @@ class playGame extends Phaser.Scene {
     this.platforms.create(50, 250, "ground").setScale(0.3, 1).refreshBody();
     this.platforms.create(750, 250, "ground").setScale(0.3, 1).refreshBody();
     this.platforms.create(400, 100, "ground").setScale(0.6, 0.5).refreshBody();
-
-    console.log("id: " + this.id);
 
     if (this.id === 1) {
       this.playerPos = [1, 740, 450];
@@ -82,7 +75,6 @@ class playGame extends Phaser.Scene {
       this.playerPos[2],
       "dude"
     );
-    console.log("player1: " + this.player.x + " " + this.player.y);
     this.player.setBounce(0.2);
     this.player.setCollideWorldBounds(true);
     this.physics.add.collider(this.player, this.platforms);
@@ -94,7 +86,6 @@ class playGame extends Phaser.Scene {
       this.otherPlayerPos[2],
       "dude"
     );
-    console.log("player2: " + this.player2.x + " " + this.player2.y);
     this.player2.setBounce(0.2);
     this.player2.setCollideWorldBounds(true);
     this.physics.add.collider(this.player2, this.platforms);
@@ -117,7 +108,6 @@ class playGame extends Phaser.Scene {
       this
     );
     this.door.create(400, 60, "door").setScale(2).refreshBody();
-    // this.door.create(435, 70, "door").setScale(2).refreshBody();
 
     //blocos mortais
     this.danger1 = this.physics.add.staticGroup();
@@ -198,28 +188,6 @@ class playGame extends Phaser.Scene {
       fontSize: "32px",
       fill: "#000",
     });
-
-    //bombas
-    /*this.bombs = this.physics.add.group();
-
-    this.physics.add.collider(this.bombs, this.platforms);
-
-    this.physics.add.collider(
-      this.player,
-      this.bombs,
-      this.hitBomb,
-      null,
-      this
-    );
-
-    this.physics.add.collider(
-      this.player2,
-      this.bombs,
-      this.hitBomb,
-      null,
-      this
-    );
-    */
   }
 
   update() {
@@ -270,9 +238,6 @@ class playGame extends Phaser.Scene {
       this.player2.setVelocityY(-330);
     }
 
-    //var dan1 = this.danger1.create(200, 530, "danger1").setScale(0.5, 0.75).refreshBody();;
-    //dan1.setCollideWorldBounds(true);
-
     if (this.id != -1) {
       for (let i = 0; i < this.activeStars.length; i++) {
         if (this.activeStars[i] === false) {
@@ -296,38 +261,11 @@ class playGame extends Phaser.Scene {
   }
 
   collectStar(player, star) {
-    //star.disableBody(true, true);
-
     for (let i = 0; i < this.stars.children.entries.length; i++) {
       if (this.stars.children.entries[i] === star) {
         this.activeStars[i] = false;
       }
     }
-
-    // if (this.stars.countActive(true) === 0) {
-    //   this.stars.children.iterate(function (child) {
-    //     child.enableBody(true, child.x, 0, true, true);
-    //   });
-
-    // var x =
-    //   player.x < 400
-    //     ? Phaser.Math.Between(400, 800)
-    //     : Phaser.Math.Between(0, 400);
-
-    // var bomb = this.bombs.create(x, 16, "bomb");
-    // bomb.setBounce(1);
-    // bomb.setCollideWorldBounds(true);
-    // bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
-    //}
-  }
-
-  hitBomb() {
-    this.physics.pause();
-    this.player.setTint(0xff00ff);
-    this.player2.setTint(0xff00ff);
-    this.player.anims.play("turn");
-
-    this.gameOver = true;
   }
 
   colideBlock() {
@@ -340,24 +278,12 @@ class playGame extends Phaser.Scene {
   }
 
   colideDoor() {
-    //var collider = Game.scene.physics.add.collider(Game.player, layer);
     if (this.score >= 60) {
-      //this.physics.pause();
-      //this.player.setTint(0xfff000);
-      //this.player2.setTint(0xfff000);
-      //this.player.anims.play("turn");
       this.gameOver = true;
       this.player.disableBody(true, true);
       this.player2.disableBody(true, true);
       this.scoreText.setText("Parabéns, Player " + (this.id + 1) + "!");
-      //this.player2.anims.play("turn");
-      //this.gameOver = true;
-      this.pass += 1;
-    } //else {
-    //desativar colisão
-    //Game.door.body.enableBody=false;
-    //collider.active = false;
-    //}
+    }
   }
 
   checkIfArraysAreDifferent(a, b) {
